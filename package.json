@@ -1,5 +1,5 @@
 {
-  "name": "url-shortener",
+  "name": "sairus_back",
   "version": "1.0.0",
   "description": "Encurtador de URL",
   "main": "./dist/index.js",

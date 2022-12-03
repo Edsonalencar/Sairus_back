@@ -1,58 +1,98 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { config } from "../config/constants";
 import shortid from "shortid";
 import { MongoModelURL } from "../models/mongoMoldels/ulr.model";
 import { StatusCodes } from "http-status-codes";
 import ForbbidenError from "../models/error/forbidden.error";
 
-const shortenerRoute = Router();
+const userRoute = Router();
 
-shortenerRoute.post(
-  "/shorten",
+// Rehister
+userRoute.post(
+  "/user",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { originURL } = req.body;
+      const { email, password } = req.body;
 
-      if (!originURL || originURL === " ") {
-        throw new ForbbidenError("URL não Informada");
+      if (!email || email === " ") {
+        throw new ForbbidenError("email não Informado");
+      }
+      if (!password || password === " ") {
+        throw new ForbbidenError("password não Informada");
       }
 
-      const url = await MongoModelURL.findOne({ originURL });
+      const user = await MongoModelURL.findOne({ email });
 
-      if (url) {
-        res.status(StatusCodes.OK).json(url);
-        return;
+      if (user) {
+        throw new ForbbidenError("o email já esta em uso");
       }
 
       const hash = shortid.generate();
-      const shortURL = `${config.API_URL}/${hash}`;
 
-      const newUrl = await MongoModelURL.create({ originURL, hash, shortURL });
-      res.status(StatusCodes.OK).json(newUrl);
+      const newUser = await MongoModelURL.create({ hash, email, password });
+
+      res.status(StatusCodes.OK).json(newUser);
     } catch (error) {
       next(error);
     }
   }
 );
 
-shortenerRoute.get(
-  "/:hash",
+// Login
+userRoute.post(
+  "/user/login",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { email, password } = req.body;
+
+      const user = await MongoModelURL.findOne({ email, password });
+
+      if (!user) {
+        throw new ForbbidenError("Usuario não encontrado");
+      }
+
+      res.status(StatusCodes.OK).json(user);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Consulta por codigo
+userRoute.get(
+  "/user/:hash",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { hash } = req.params;
 
-      const url = await MongoModelURL.findOne({ hash });
-      const originURL = url?.originURL;
+      const user = await MongoModelURL.findOne({ hash });
 
-      if (!originURL) {
-        throw new ForbbidenError("URL Invalida");
+      if (!user) {
+        throw new ForbbidenError("Usuario não encontrado");
       }
 
-      res.status(StatusCodes.OK).redirect(originURL);
+      const { dados_pessoais, dados_saude, dados_endereco } = user;
+
+      res
+        .status(StatusCodes.OK)
+        .json({ dados_pessoais, dados_saude, dados_endereco });
     } catch (error) {
       next(error);
     }
   }
 );
 
-export default shortenerRoute;
+// Consulta todos os usuarios cadastrados
+userRoute.get(
+  "/user",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const users = await MongoModelURL.find();
+
+      res.status(StatusCodes.OK).json(users);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+export default userRoute;
