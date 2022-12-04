@@ -1,15 +1,14 @@
-# Url Shortener ✂️
+# Back Sairus ✂️
 
-Construido com Typescript o Url shortener é um encurtador de url rapido e pratico, esse projeto foi desenvolvido para fixar meus estudos em typescript, node e mongoDB
+Construido com Typescript e mongoDB o Back Sairus como o proprio nome sugere foi desenvolvido para suprir as nescessidades do projeto Sairus que também pode ser encontrado entre os meus repositorios, mas de modo geral este projeto tem como função o gerenciamento de dados pessoais do usuario incluindo, dados medicos.
 
-## Composição do projeto
+### Endpoints e data
 
-Neste projeto Temos dois **Endpoints**, um para gerar a URL encurtada e outro para quando essa URL for usada redirecionar o usuário para o destino de origem.
-
-### Endpoints
-
-* POST / shorten
-* GET /:hash
+* POST /user         
+* GET /user          
+* GET /user/:hash    
+* GET /users         
+* POST /user/data
 
 ### Informações Pessoais
 

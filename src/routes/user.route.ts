@@ -38,8 +38,8 @@ userRoute.post(
 );
 
 // Login
-userRoute.post(
-  "/user/login",
+userRoute.get(
+  "/user",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { email, password } = req.body;
@@ -83,12 +83,37 @@ userRoute.get(
 
 // Consulta todos os usuarios cadastrados
 userRoute.get(
-  "/user",
+  "/users",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const users = await MongoModelURL.find();
 
       res.status(StatusCodes.OK).json(users);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Atualiza dados usuario
+userRoute.post(
+  "/user/data",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { hash, data } = req.body;
+
+      await MongoModelURL.findOneAndUpdate({ hash }, data);
+      const user = await MongoModelURL.findOne({ hash });
+
+      if (!user) {
+        throw new ForbbidenError("Erro ao atualizar dados");
+      }
+
+      const { dados_pessoais, dados_saude, dados_endereco } = user;
+
+      res
+        .status(StatusCodes.OK)
+        .json({ dados_pessoais, dados_saude, dados_endereco });
     } catch (error) {
       next(error);
     }
